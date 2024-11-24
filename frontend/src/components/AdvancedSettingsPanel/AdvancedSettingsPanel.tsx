@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Stack, Dropdown, IDropdownOption, Slider, Checkbox } from '@fluentui/react'
-import styles from './AdvancedSettingsPanel.module.css' // Ensure this is your provided CSS
+import styles from './AdvancedSettingsPanel.module.css'
 
 interface AdvancedSettingsPanelProps {
   models: string[]
@@ -18,6 +18,12 @@ interface AdvancedSettingsPanelProps {
   selectedSearchStrictness: number
   selectedTopK: number
   isEnableInDomain: boolean
+  onModelChange: (model: string) => void
+  onTemperatureChange: (temperature: number) => void
+  onTopPChange: (topP: number) => void
+  onSearchStrictnessChange: (searchStrictness: number) => void
+  onTopKChange: (topK: number) => void
+  onEnableInDomainChange: (enableInDomain: boolean) => void
 }
 
 const AdvancedSettingsPanel: React.FC<AdvancedSettingsPanelProps> = ({
@@ -35,30 +41,16 @@ const AdvancedSettingsPanel: React.FC<AdvancedSettingsPanelProps> = ({
   selectedTopP,
   selectedSearchStrictness,
   selectedTopK,
-  isEnableInDomain
+  isEnableInDomain,
+  onModelChange,
+  onTemperatureChange,
+  onTopPChange,
+  onSearchStrictnessChange,
+  onTopKChange,
+  onEnableInDomainChange
 }) => {
-  const [model, setModel] = useState(selectedModel)
-  const [temperature, setTemperature] = useState(selectedTemperature)
-  const [topP, setTopP] = useState(selectedTopP)
-  const [searchStrictness, setSearchStrictness] = useState(selectedSearchStrictness)
-  const [topK, setTopK] = useState(selectedTopK)
-  const [enableInDomain, setEnableInDomain] = useState(isEnableInDomain)
-
-  // Save settings to local storage
-  useEffect(() => {
-    const settings = {
-      model,
-      temperature,
-      topP,
-      searchStrictness,
-      topK,
-      enableInDomain
-    }
-    localStorage.setItem('advancedSettings', JSON.stringify(settings))
-  }, [model, temperature, topP, searchStrictness, topK, enableInDomain])
-
   const handleModelChange = (_: React.FormEvent<HTMLDivElement>, option?: IDropdownOption) => {
-    if (option) setModel(option.key as string)
+    if (option) onModelChange(option.key as string)
   }
 
   return (
@@ -66,7 +58,7 @@ const AdvancedSettingsPanel: React.FC<AdvancedSettingsPanelProps> = ({
       <Dropdown
         label="Select Model"
         options={models.map(model => ({ key: model, text: model }))}
-        selectedKey={model}
+        selectedKey={selectedModel}
         onChange={handleModelChange}
         placeholder="Choose a model"
         className={styles.chatGroup}
@@ -76,8 +68,8 @@ const AdvancedSettingsPanel: React.FC<AdvancedSettingsPanelProps> = ({
         min={temperatureLow}
         max={temperatureHigh}
         step={0.01}
-        value={temperature}
-        onChange={setTemperature}
+        value={selectedTemperature}
+        onChange={onTemperatureChange}
         className={styles.chatGroup}
       />
       <Slider
@@ -85,8 +77,8 @@ const AdvancedSettingsPanel: React.FC<AdvancedSettingsPanelProps> = ({
         min={topPLow}
         max={topPHigh}
         step={0.01}
-        value={topP}
-        onChange={setTopP}
+        value={selectedTopP}
+        onChange={onTopPChange}
         className={styles.chatGroup}
       />
       <Slider
@@ -94,8 +86,8 @@ const AdvancedSettingsPanel: React.FC<AdvancedSettingsPanelProps> = ({
         min={searchStrictnessLow}
         max={searchStrictnessHigh}
         step={1}
-        value={searchStrictness}
-        onChange={setSearchStrictness}
+        value={selectedSearchStrictness}
+        onChange={onSearchStrictnessChange}
         className={styles.chatGroup}
       />
       <Slider
@@ -103,14 +95,14 @@ const AdvancedSettingsPanel: React.FC<AdvancedSettingsPanelProps> = ({
         min={topKLow}
         max={topKHigh}
         step={1}
-        value={topK}
-        onChange={setTopK}
+        value={selectedTopK}
+        onChange={onTopKChange}
         className={styles.chatGroup}
       />
       <Checkbox
         label="Enable In Domain"
-        checked={enableInDomain}
-        onChange={(_, checked) => setEnableInDomain(!!checked)}
+        checked={isEnableInDomain}
+        onChange={(_, checked) => onEnableInDomainChange(!!checked)}
         className={styles.chatGroup}
       />
     </Stack>
