@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -8,6 +8,10 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- Inject environment variables -->
+    <script>
+      window.env = {{ env_vars | tojson }};
+    </script>
     <script type="module" src="/src/index.tsx"></script>
   </body>
 </html>
