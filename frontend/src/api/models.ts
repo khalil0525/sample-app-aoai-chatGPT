@@ -83,9 +83,18 @@ export type ChatResponse = {
   }
   error?: any
 }
+export type AdvancedSettings = {
+  azure_openai_model_name?: string
+  azure_openai_temperature?: number
+  azure_openai_top_p?: number
+  search_top_k?: number
+  search_strictness?: number
+  search_enable_in_domain?: boolean
+}
 
 export type ConversationRequest = {
   messages: ChatMessage[]
+  settings?: AdvancedSettings
 }
 
 export type UserInfo = {
