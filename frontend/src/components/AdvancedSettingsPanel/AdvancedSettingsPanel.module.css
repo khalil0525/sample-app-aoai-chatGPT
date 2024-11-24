@@ -1,0 +1,43 @@
+.container {
+  max-height: calc(100vh - 100px);
+  width: 300px;
+  padding: 10px;
+  border: 1px solid #d1d1d1;
+  border-radius: 5px;
+  background-color: #ffffff;
+  overflow: hidden;
+}
+
+.listContainer {
+  overflow-y: auto;
+  max-height: calc(90vh - 105px);
+  padding: 10px;
+}
+
+.chatGroup {
+  margin: auto 5px;
+  width: 100%;
+}
+
+.itemButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 40px;
+  border: 1px solid #d1d1d1;
+  border-radius: 5px;
+  background-color: white;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.itemButton:hover {
+  background-color: #e6e6e6;
+}
+
+@media (max-width: 480px) {
+  .container {
+    width: 100%;
+  }
+}
