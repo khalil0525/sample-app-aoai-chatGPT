@@ -60,11 +60,29 @@ def create_app():
 
 
 @bp.route("/")
+
 async def index():
+    env_vars = {
+        "azureOpenaiModelName": os.getenv("AZURE_OPENAI_MODEL_NAME", ""),
+        "azureOpenaiTopP": os.getenv("AZURE_OPENAI_TOP_P", ""),
+        "uiModelList": os.getenv("UI_MODEL_LIST", ""),
+        "uiTemperatureLow": os.getenv("UI_TEMPERATURE_LOW", ""),
+        "uiTemperatureHigh": os.getenv("UI_TEMPERATURE_HIGH", ""),
+        "uiTopPLow": os.getenv("UI_TOP_P_LOW", ""),
+        "uiTopPHigh": os.getenv("UI_TOP_P_HIGH", ""),
+        "uiSearchStrictnessLow": os.getenv("UI_SEARCH_STRICTNESS_LOW", ""),
+        "uiSearchStrictnessHigh": os.getenv("UI_SEARCH_STRICTNESS_HIGH", ""),
+        "uiTopKLow": os.getenv("UI_TOP_K_LOW", ""),
+        "uiTopKHigh": os.getenv("UI_TOP_K_HIGH", ""),
+        "searchTopK": os.getenv("SEARCH_TOP_K", ""),
+        "searchStrictness": os.getenv("SEARCH_STRICTNESS", ""),
+        "searchEnableInDomain": os.getenv("SEARCH_ENABLE_IN_DOMAIN", "True"),
+    }
     return await render_template(
         "index.html",
         title=app_settings.ui.title,
-        favicon=app_settings.ui.favicon
+        favicon=app_settings.ui.favicon,
+        envVars=env_vars
     )
 
 
