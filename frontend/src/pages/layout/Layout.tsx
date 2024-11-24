@@ -40,7 +40,8 @@ const Layout = () => {
       uiTopKHigh: window.env.uiTopKHigh || 40,
       searchTopK: window.env.searchTopK || 10,
       searchStrictness: window.env.searchStrictness || 5,
-      searchEnableInDomain: window.env.searchEnableInDomain === 'True'
+      searchEnableInDomain: window.env.searchEnableInDomain === 'True',
+      azureOpenaiTemperature: window.env.azureOpenaiTemperature || 10
     }
 
     const savedSettings = localStorage.getItem('advancedSettings')
@@ -56,14 +57,14 @@ const Layout = () => {
     if (savedSettings) {
       const parsedSettings = JSON.parse(savedSettings)
       setSelectedModel(parsedSettings.model || envVars.azureOpenaiModelName)
-      setSelectedTemperature(parsedSettings.temperature || envVars.uiTemperatureLow)
+      setSelectedTemperature(parsedSettings.temperature || envVars.azureOpenaiTemperature)
       setSelectedTopP(parsedSettings.topP || envVars.azureOpenaiTopP)
       setSelectedSearchStrictness(parsedSettings.searchStrictness || envVars.searchStrictness)
       setSelectedTopK(parsedSettings.topK || envVars.searchTopK)
       setIsEnableInDomain(parsedSettings.enableInDomain ?? envVars.searchEnableInDomain)
     } else {
       setSelectedModel(envVars.azureOpenaiModelName as string)
-      setSelectedTemperature(envVars.uiTemperatureLow as number)
+      setSelectedTemperature(envVars.azureOpenaiTemperature as number)
       setSelectedTopP(envVars.azureOpenaiTopP as number)
       setSelectedSearchStrictness(envVars.searchStrictness as number)
       setSelectedTopK(envVars.searchTopK as number)

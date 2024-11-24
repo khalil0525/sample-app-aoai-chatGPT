@@ -77,6 +77,7 @@ async def index():
         "searchTopK": os.getenv("SEARCH_TOP_K", ""),
         "searchStrictness": os.getenv("SEARCH_STRICTNESS", ""),
         "searchEnableInDomain": os.getenv("SEARCH_ENABLE_IN_DOMAIN", "True"),
+        "azureOpenaiTemperature": os.getenv("AZURE_OPENAI_TEMPERATURE", "")
     }
     return await render_template(
         "index.html",
