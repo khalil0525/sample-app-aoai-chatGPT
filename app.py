@@ -82,7 +82,7 @@ async def index():
         "index.html",
         title=app_settings.ui.title,
         favicon=app_settings.ui.favicon,
-        envVars=env_vars
+        env_vars=env_vars
     )
 
 
