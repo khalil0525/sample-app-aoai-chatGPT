@@ -28,3 +28,14 @@ export const HistoryButton: React.FC<ButtonProps> = ({ onClick, text }) => {
     />
   )
 }
+
+export const SettingsButton: React.FC<ButtonProps> = ({ onClick, text }) => {
+  return (
+    <CommandBarButton
+      className={styles.settingsButtonRoot}
+      iconProps={{ iconName: 'Settings' }}
+      onClick={onClick}
+      text={text}
+    />
+  )
+}
