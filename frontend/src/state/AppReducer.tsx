@@ -3,6 +3,45 @@ import { Action, AppState } from './AppProvider'
 // Define the reducer function
 export const appStateReducer = (state: AppState, action: Action): AppState => {
   switch (action.type) {
+    case 'SET_ADVANCED_SETTINGS': {
+      const updatedAdvancedSettings = {
+        ...state.advancedSettings,
+        ...action.payload
+      }
+
+      return {
+        ...state,
+        advancedSettings: updatedAdvancedSettings
+      }
+    }
+    case 'UPDATE_ADVANCED_SETTINGS': {
+      const updatedAdvancedSettings = {
+        ...state.advancedSettings,
+        ...action.payload
+      }
+
+      // Persist only azure and search-related keys in localStorage
+      const keysToPersist = [
+        'azure_openai_model_name',
+        'azure_openai_temperature',
+        'azure_openai_top_p',
+        'search_enable_in_domain',
+        'search_strictness',
+        'search_top_k'
+      ]
+
+      const persistentSettings = Object.fromEntries(
+        Object.entries(updatedAdvancedSettings).filter(([key]) => keysToPersist.includes(key))
+      )
+
+      // Store the filtered settings in localStorage
+      localStorage.setItem('advancedSettings', JSON.stringify(persistentSettings))
+
+      return {
+        ...state,
+        advancedSettings: updatedAdvancedSettings
+      }
+    }
     case 'TOGGLE_CHAT_HISTORY':
       return { ...state, isChatHistoryOpen: !state.isChatHistoryOpen }
     case 'UPDATE_CURRENT_CHAT':

@@ -1,11 +1,7 @@
-import React, {
-  createContext,
-  ReactNode,
-  useEffect,
-  useReducer
-} from 'react'
+import React, { createContext, ReactNode, useEffect, useReducer } from 'react'
 
 import {
+  AdvancedSettings,
   ChatHistoryLoadingState,
   Conversation,
   CosmosDBHealth,
@@ -28,8 +24,9 @@ export interface AppState {
   currentChat: Conversation | null
   frontendSettings: FrontendSettings | null
   feedbackState: { [answerId: string]: Feedback.Neutral | Feedback.Positive | Feedback.Negative }
-  isLoading: boolean;
+  isLoading: boolean
   answerExecResult: { [answerId: string]: [] }
+  advancedSettings: AdvancedSettings | null
 }
 
 export type Action =
@@ -46,11 +43,16 @@ export type Action =
   | { type: 'FETCH_CHAT_HISTORY'; payload: Conversation[] | null }
   | { type: 'FETCH_FRONTEND_SETTINGS'; payload: FrontendSettings | null }
   | {
-    type: 'SET_FEEDBACK_STATE'
-    payload: { answerId: string; feedback: Feedback.Positive | Feedback.Negative | Feedback.Neutral }
-  }
+      type: 'SET_FEEDBACK_STATE'
+      payload: { answerId: string; feedback: Feedback.Positive | Feedback.Negative | Feedback.Neutral }
+    }
   | { type: 'GET_FEEDBACK_STATE'; payload: string }
-  | { type: 'SET_ANSWER_EXEC_RESULT'; payload: { answerId: string, exec_result: [] } }
+  | { type: 'SET_ANSWER_EXEC_RESULT'; payload: { answerId: string; exec_result: [] } }
+  | {
+      type: 'SET_ADVANCED_SETTINGS'
+      payload: AdvancedSettings
+    }
+  | { type: 'UPDATE_ADVANCED_SETTINGS'; payload: AdvancedSettings }
 
 const initialState: AppState = {
   isChatHistoryOpen: false,
@@ -66,13 +68,14 @@ const initialState: AppState = {
   feedbackState: {},
   isLoading: true,
   answerExecResult: {},
+  advancedSettings: null
 }
 
 export const AppStateContext = createContext<
   | {
-    state: AppState
-    dispatch: React.Dispatch<Action>
-  }
+      state: AppState
+      dispatch: React.Dispatch<Action>
+    }
   | undefined
 >(undefined)
 
@@ -153,6 +156,52 @@ export const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) 
         })
     }
     getFrontendSettings()
+  }, [])
+
+  useEffect(() => {
+    const camelToSnake = (str: string) => {
+      return str.includes('_') ? str : str.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase()
+    }
+
+    const parseSettings = (settings: any) => {
+      const parsed: Record<string, any> = {}
+      Object.keys(settings).forEach(key => {
+        const snakeKey = camelToSnake(key)
+        parsed[snakeKey] = settings[key]
+      })
+      return parsed
+    }
+
+    const advancedSettings: AdvancedSettings = {}
+
+    // Parse environment settings first
+    const advancedSettingsFromEnv = window.env || {}
+    Object.assign(advancedSettings, parseSettings(advancedSettingsFromEnv))
+
+    console.log('Initial advancedSettings from env:', advancedSettings)
+
+    // Now, check if localStorage has custom settings and overwrite the ones from the environment
+    const advancedSettingsFromLocalStorage = localStorage.getItem('advancedSettings')
+    if (advancedSettingsFromLocalStorage) {
+      try {
+        const parsedSettings = JSON.parse(advancedSettingsFromLocalStorage)
+        // Only override settings if they exist in localStorage
+        const parsedLocalStorageSettings = parseSettings(parsedSettings)
+        Object.keys(parsedLocalStorageSettings).forEach(key => {
+          // Only override if the setting exists in localStorage
+          if (parsedLocalStorageSettings[key] !== undefined) {
+            advancedSettings[key] = parsedLocalStorageSettings[key]
+          }
+        })
+      } catch (e) {
+        console.error('Error parsing advancedSettings from localStorage', e)
+      }
+    }
+
+    console.log('Final advancedSettings after applying localStorage overrides:', advancedSettings)
+
+    // Dispatch the final settings to the store
+    dispatch({ type: 'SET_ADVANCED_SETTINGS', payload: advancedSettings })
   }, [])
 
   return <AppStateContext.Provider value={{ state, dispatch }}>{children}</AppStateContext.Provider>
