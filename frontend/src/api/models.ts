@@ -90,6 +90,7 @@ export type AdvancedSettings = {
   search_top_k?: number
   search_strictness?: number
   search_enable_in_domain?: boolean
+  [key: string]: string | number | boolean | undefined | Array<string>
 }
 
 export type ConversationRequest = {
