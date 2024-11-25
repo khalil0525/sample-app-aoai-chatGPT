@@ -59,6 +59,7 @@ const AdvancedSettingsPanel: React.FC<AdvancedSettingsPanelProps> = ({
         label="Select Model"
         options={models.map(model => ({ key: model, text: model }))}
         selectedKey={selectedModel}
+        defaultSelectedKey={selectedModel}
         onChange={handleModelChange}
         placeholder="Choose a model"
         className={styles.chatGroup}
