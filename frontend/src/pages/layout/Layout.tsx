@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import React, { useContext, useRef, useState } from 'react'
 import { Link, Outlet } from 'react-router-dom'
 import { CommandBarButton, Dialog, Stack } from '@fluentui/react'
 import { AppStateContext } from '../../state/AppProvider'
@@ -10,83 +10,14 @@ import styles from './Layout.module.css'
 
 const Layout = () => {
   const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState<boolean>(false)
-  const [logo, setLogo] = useState('')
-  const [advancedSettings, setAdvancedSettings] = useState<any>(null)
-
-  const [selectedModel, setSelectedModel] = useState<string>('')
-  const [selectedTemperature, setSelectedTemperature] = useState<number>(0)
-  const [selectedTopP, setSelectedTopP] = useState<number>(0)
-  const [selectedSearchStrictness, setSelectedSearchStrictness] = useState<number>(0)
-  const [selectedTopK, setSelectedTopK] = useState<number>(0)
-  const [isEnableInDomain, setIsEnableInDomain] = useState<boolean>(false)
 
   const appStateContext = useContext(AppStateContext)
-  const ui = appStateContext?.state.frontendSettings?.ui
+  const { state } = appStateContext || {}
+  const { frontendSettings, advancedSettings } = state || {}
 
+  const ui = frontendSettings?.ui
   const settingsButtonRef = useRef<CommandBarButton | null>(null)
-
-  useEffect(() => {
-    const envVars = {
-      azureOpenaiModelName: window.env.azureOpenaiModelName || '',
-      azureOpenaiTopP: window.env.azureOpenaiTopP || 0,
-      uiModelList: window.env.uiModelList || [],
-      uiTemperatureLow: window.env.uiTemperatureLow || 0,
-      uiTemperatureHigh: window.env.uiTemperatureHigh || 1,
-      uiTopPLow: window.env.uiTopPLow || 0.1,
-      uiTopPHigh: window.env.uiTopPHigh || 1,
-      uiSearchStrictnessLow: window.env.uiSearchStrictnessLow || 1,
-      uiSearchStrictnessHigh: window.env.uiSearchStrictnessHigh || 10,
-      uiTopKLow: window.env.uiTopKLow || 1,
-      uiTopKHigh: window.env.uiTopKHigh || 40,
-      searchTopK: window.env.searchTopK || 10,
-      searchStrictness: window.env.searchStrictness || 5,
-      searchEnableInDomain: window.env.searchEnableInDomain === 'True',
-      azureOpenaiTemperature: window.env.azureOpenaiTemperature || 10
-    }
-
-    const savedSettings = localStorage.getItem('advancedSettings')
-    const localStorageSettings = savedSettings ? JSON.parse(savedSettings) : {}
-
-    const settings = {
-      ...envVars,
-      ...localStorageSettings
-    }
-
-    setAdvancedSettings(settings)
-
-    if (savedSettings) {
-      const parsedSettings = JSON.parse(savedSettings)
-      setSelectedModel(parsedSettings.model || envVars.azureOpenaiModelName)
-      setSelectedTemperature(parsedSettings.temperature || envVars.azureOpenaiTemperature)
-      setSelectedTopP(parsedSettings.topP || envVars.azureOpenaiTopP)
-      setSelectedSearchStrictness(parsedSettings.searchStrictness || envVars.searchStrictness)
-      setSelectedTopK(parsedSettings.topK || envVars.searchTopK)
-      setIsEnableInDomain(parsedSettings.enableInDomain ?? envVars.searchEnableInDomain)
-    } else {
-      setSelectedModel(envVars.azureOpenaiModelName as string)
-      setSelectedTemperature(envVars.azureOpenaiTemperature as number)
-      setSelectedTopP(envVars.azureOpenaiTopP as number)
-      setSelectedSearchStrictness(envVars.searchStrictness as number)
-      setSelectedTopK(envVars.searchTopK as number)
-      setIsEnableInDomain(envVars.searchEnableInDomain as boolean)
-    }
-
-    if (!appStateContext?.state.isLoading) {
-      setLogo(ui?.logo || Contoso)
-    }
-  }, [appStateContext?.state.isLoading, ui])
-
-  useEffect(() => {
-    const settings = {
-      model: selectedModel,
-      temperature: selectedTemperature,
-      topP: selectedTopP,
-      searchStrictness: selectedSearchStrictness,
-      topK: selectedTopK,
-      enableInDomain: isEnableInDomain
-    }
-    localStorage.setItem('advancedSettings', JSON.stringify(settings))
-  }, [selectedModel, selectedTemperature, selectedTopP, selectedSearchStrictness, selectedTopK, isEnableInDomain])
+  const logo = ui?.logo || Contoso
 
   const handleSettingsClick = () => {
     setIsSettingsDialogOpen(true)
@@ -100,7 +31,7 @@ const Layout = () => {
 
   return (
     <div className={styles.layout}>
-      <header className={styles.header} role={'banner'}>
+      <header className={styles.header} role="banner">
         <Stack horizontal verticalAlign="center" horizontalAlign="space-between">
           <Stack horizontal verticalAlign="center">
             <img src={logo} className={styles.headerIcon} aria-hidden="true" alt="" />
@@ -109,11 +40,11 @@ const Layout = () => {
             </Link>
           </Stack>
           <Stack horizontal tokens={{ childrenGap: 4 }} className={styles.shareButtonContainer}>
-            {appStateContext?.state.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured &&
+            {state?.isCosmosDBAvailable?.status !== CosmosDBStatus.NotConfigured &&
               ui?.show_chat_history_button !== false && (
                 <HistoryButton
                   onClick={() => appStateContext?.dispatch({ type: 'TOGGLE_CHAT_HISTORY' })}
-                  text={'Show/Hide History'}
+                  text="Show/Hide History"
                 />
               )}
             <SettingsButton onClick={handleSettingsClick} text="Settings" ref={settingsButtonRef} />
@@ -149,27 +80,63 @@ const Layout = () => {
           showCloseButton: true
         }}>
         <AdvancedSettingsPanel
-          models={advancedSettings.uiModelList?.length ? advancedSettings.uiModelList?.split(',') : []}
-          temperatureLow={advancedSettings.uiTemperatureLow}
-          temperatureHigh={advancedSettings.uiTemperatureHigh}
-          topPLow={advancedSettings.uiTopPLow}
-          topPHigh={advancedSettings.uiTopPHigh}
-          searchStrictnessLow={advancedSettings.uiSearchStrictnessLow}
-          searchStrictnessHigh={advancedSettings.uiSearchStrictnessHigh}
-          topKLow={advancedSettings.uiTopKLow}
-          topKHigh={advancedSettings.uiTopKHigh}
-          selectedModel={selectedModel}
-          selectedTemperature={selectedTemperature}
-          selectedTopP={selectedTopP}
-          selectedSearchStrictness={selectedSearchStrictness}
-          selectedTopK={selectedTopK}
-          isEnableInDomain={isEnableInDomain}
-          onModelChange={setSelectedModel}
-          onTemperatureChange={setSelectedTemperature}
-          onTopPChange={setSelectedTopP}
-          onSearchStrictnessChange={setSelectedSearchStrictness}
-          onTopKChange={setSelectedTopK}
-          onEnableInDomainChange={setIsEnableInDomain}
+          models={
+            Array.isArray(advancedSettings.ui_model_list)
+              ? advancedSettings.ui_model_list
+              : typeof advancedSettings.ui_model_list === 'string' && advancedSettings.ui_model_list.length > 0
+                ? advancedSettings.ui_model_list.split(',')
+                : []
+          }
+          temperatureLow={Number(advancedSettings.ui_temperature_low) || 0}
+          temperatureHigh={Number(advancedSettings.ui_temperature_high) || 1}
+          topPLow={Number(advancedSettings.ui_top_plow) || 0}
+          topPHigh={Number(advancedSettings.ui_top_phigh) || 1}
+          searchStrictnessLow={Number(advancedSettings.ui_search_stricwtness_low) || 0}
+          searchStrictnessHigh={Number(advancedSettings.ui_search_strictness_high) || 1}
+          topKLow={Number(advancedSettings.ui_top_klow) || 0}
+          topKHigh={Number(advancedSettings.ui_top_khigh) || 10}
+          selectedModel={String(advancedSettings.azure_openai_model_name)}
+          selectedTemperature={Number(advancedSettings.azure_openai_temperature) || 0}
+          selectedTopP={Number(advancedSettings.azure_openai_top_p) || 0}
+          selectedSearchStrictness={Number(advancedSettings.search_strictness) || 0}
+          selectedTopK={Number(advancedSettings.search_top_k) || 0}
+          isEnableInDomain={Boolean(advancedSettings.search_enable_in_domain)}
+          onModelChange={value =>
+            appStateContext?.dispatch({
+              type: 'UPDATE_ADVANCED_SETTINGS',
+              payload: { ...advancedSettings, azure_openai_model_name: String(value) }
+            })
+          }
+          onTemperatureChange={value =>
+            appStateContext?.dispatch({
+              type: 'UPDATE_ADVANCED_SETTINGS',
+              payload: { ...advancedSettings, azure_openai_temperature: Number(value) }
+            })
+          }
+          onTopPChange={value =>
+            appStateContext?.dispatch({
+              type: 'UPDATE_ADVANCED_SETTINGS',
+              payload: { ...advancedSettings, azure_openai_top_p: Number(value) }
+            })
+          }
+          onSearchStrictnessChange={value =>
+            appStateContext?.dispatch({
+              type: 'UPDATE_ADVANCED_SETTINGS',
+              payload: { ...advancedSettings, search_strictness: Number(value) }
+            })
+          }
+          onTopKChange={value =>
+            appStateContext?.dispatch({
+              type: 'UPDATE_ADVANCED_SETTINGS',
+              payload: { ...advancedSettings, search_top_k: Number(value) }
+            })
+          }
+          onEnableInDomainChange={value =>
+            appStateContext?.dispatch({
+              type: 'UPDATE_ADVANCED_SETTINGS',
+              payload: { ...advancedSettings, search_enable_in_domain: Boolean(value) }
+            })
+          }
         />
       </Dialog>
     </div>
