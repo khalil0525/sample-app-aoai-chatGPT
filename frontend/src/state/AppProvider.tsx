@@ -87,7 +87,6 @@ export const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) 
   const [state, dispatch] = useReducer(appStateReducer, initialState)
 
   useEffect(() => {
-    // Check for cosmosdb config and fetch initial data here
     const fetchChatHistory = async (offset = 0): Promise<Conversation[] | null> => {
       const result = await historyList(offset)
         .then(response => {
@@ -174,21 +173,16 @@ export const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) 
 
     const advancedSettings: AdvancedSettings = {}
 
-    // Parse environment settings first
     const advancedSettingsFromEnv = window.env || {}
     Object.assign(advancedSettings, parseSettings(advancedSettingsFromEnv))
 
-    console.log('Initial advancedSettings from env:', advancedSettings)
-
-    // Now, check if localStorage has custom settings and overwrite the ones from the environment
     const advancedSettingsFromLocalStorage = localStorage.getItem('advancedSettings')
     if (advancedSettingsFromLocalStorage) {
       try {
         const parsedSettings = JSON.parse(advancedSettingsFromLocalStorage)
-        // Only override settings if they exist in localStorage
+
         const parsedLocalStorageSettings = parseSettings(parsedSettings)
         Object.keys(parsedLocalStorageSettings).forEach(key => {
-          // Only override if the setting exists in localStorage
           if (parsedLocalStorageSettings[key] !== undefined) {
             advancedSettings[key] = parsedLocalStorageSettings[key]
           }
@@ -200,7 +194,6 @@ export const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) 
 
     console.log('Final advancedSettings after applying localStorage overrides:', advancedSettings)
 
-    // Dispatch the final settings to the store
     dispatch({ type: 'SET_ADVANCED_SETTINGS', payload: advancedSettings })
   }, [])
 

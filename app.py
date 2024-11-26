@@ -227,6 +227,7 @@ async def init_cosmosdb_client():
 
 def prepare_model_args(request_body, request_headers):
     request_messages = request_body.get("messages", [])
+    request_settings = request_body.get("settings", {})
     messages = []
     if not app_settings.datasource:
         messages = [
@@ -261,17 +262,28 @@ def prepare_model_args(request_body, request_headers):
         conversation_id = request_body.get("conversation_id", None)
         application_name = app_settings.ui.title
         user_json = get_msdefender_user_json(authenticated_user_details, request_headers, conversation_id, application_name)
-
+    
+    # Custom logic
     model_args = {
         "messages": messages,
-        "temperature": app_settings.azure_openai.temperature,
+        "temperature": request_settings['azure_openai_temperature'] ,
         "max_tokens": app_settings.azure_openai.max_tokens,
-        "top_p": app_settings.azure_openai.top_p,
+        "top_p": request_settings['azure_openai_top_p'],
         "stop": app_settings.azure_openai.stop_sequence,
         "stream": app_settings.azure_openai.stream,
-        "model": app_settings.azure_openai.model,
+        "model": request_settings['azure_openai_model_name'],
         "user": user_json
     }
+
+    if hasattr(app_settings.datasource, 'enable_in_domain'):
+        app_settings.datasource.enable_in_domain = request_settings.get('search_enable_in_domain')
+
+    if hasattr(app_settings.datasource, 'top_k'):
+        app_settings.datasource.top_k = int(request_settings.get('search_top_k', app_settings.datasource.top_k))
+
+    if hasattr(app_settings.datasource, 'strictness'):
+        app_settings.datasource.strictness = int(request_settings.get('search_strictness', app_settings.datasource.strictness))
+
 
     if app_settings.datasource:
         model_args["extra_body"] = {
