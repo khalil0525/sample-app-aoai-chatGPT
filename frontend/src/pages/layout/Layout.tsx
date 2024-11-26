@@ -10,6 +10,7 @@ import styles from './Layout.module.css'
 
 const Layout = () => {
   const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState<boolean>(false)
+  const [isWatermarkVisible, setIsWatermarkVisible] = useState<boolean>(true) // State for hyperlink visibility
 
   const appStateContext = useContext(AppStateContext)
   const { state } = appStateContext || {}
@@ -139,6 +140,14 @@ const Layout = () => {
           }
         />
       </Dialog>
+      {isWatermarkVisible && (
+        <div className={styles.watermark}>
+          Made by...
+          <a href="https://khalil-collins-swe.netlify.app/" target="_blank" rel="noopener noreferrer">
+            hyperlink
+          </a>
+        </div>
+      )}
     </div>
   )
 }
